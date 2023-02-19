@@ -1,7 +1,7 @@
 'use strict';
 
 const
-  port = 8888;
+  port = 8000;
 const express = require('express');
 const app = express();
 
@@ -18,4 +18,5 @@ app.get('/hello/:name?', (req, res) => {
 
 app.listen(port, () =>
   console.table(`Server started on port ${port}`)
+  
 );
