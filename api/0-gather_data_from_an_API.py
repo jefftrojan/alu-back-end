@@ -2,24 +2,23 @@
 """ returns TODO list """
 
 
-import json
 import requests
 import sys
-if __name__ == "__main__":
-    link = "https://jsonplaceholder.typicode.com/users/{}".format(sys.argv[1])
-    res = requests.get(link)
-    user = json.loads(res.text)
-    num = sys.argv[1]
-    link = "https://jsonplaceholder.typicode.com/users/{}/todos".format(num)
-    res = requests.get(link)
-    todos = json.loads(res.text)
-    done = []
-    for i in todos:
-        if i['completed']:
-            done.append(i)
-    print('Employee {} is done with tasks({}/{}):'.format(
-                                                          user['name'],
-                                                          len(done),
-                                                          len(todos)))
-    for i in done:
-        print("\t {}".format(i["title"]))
+
+employee_id = sys.argv[1]
+response = requests.get(f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}")
+
+if response.status_code != 200:
+    print(f"Error retrieving TODO list for employee ID {employee_id}")
+    sys.exit(1)
+
+todos = response.json()
+completed_tasks = [todo for todo in todos if todo["completed"]]
+total_tasks = len(todos)
+
+employee_name = todos[0]["username"]
+print(f"Employee {employee_name} is done with tasks ({len(completed_tasks)}/{total_tasks}):")
+
+for todo in completed_tasks:
+    print(f"\t{todo['title']}")
+

@@ -4,7 +4,7 @@
 import csv
 import json
 import requests
-import sys
+from sys import argv
 if __name__ == "__main__":
     link = "https://jsonplaceholder.typicode.com/users/{}".format(sys.argv[1])
     res = requests.get(link)
