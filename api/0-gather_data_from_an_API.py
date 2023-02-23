@@ -1,27 +1,35 @@
 #!/usr/bin/python3
-"""a Python script that, using this REST API"""
+"""A script using  REST API for a given employee ID,
+returns information about his/her TODO list progress.
+"""
 
 import requests
 import sys
 
-""" Functions for gathering  data from an API """
+
+"""Import Libs"""
 
 if __name__ == "__main__":
-    employee_id = sys.argv[1]
-    url = "https://jsonplaceholder.typicode.com/users/{}".format(employee_id)
+    user_id = int(sys.argv[1])
+    todos_url = "https://jsonplaceholder.typicode.com/todos"
+    users_url = "https://jsonplaceholder.typicode.com/users/{}".format(user_id)
 
-    todo = "https://jsonplaceholder.typicode.com/todos?userId={}"
-    todo = todo.format(employee_id)
+    todo_data = requests.get(todos_url).json()
 
-    user_info = requests.request("GET", url).json()
-    todo_info = requests.request("GET", todo).json()
+    employee_name = requests.get(users_url).json()["name"]
 
-    employee_name = user_info.get("name")
-    total_tasks = list(filter(lambda x: (x["completed"] is True), todo_info))
-    task_com = len(total_tasks)
-    total_task_done = len(todo_info)
+    total_user_todos = 0
+    completed_todos = 0
+    titles = []
+    for todo in todo_data:
+        if user_id == todo["userId"]:
+            total_user_todos += 1
+            if todo["completed"]:
+                completed_todos += 1
+                titles.append(todo["title"])
 
-    print("Employee {} is done with tasks({}/{}):".format(employee_name,
-          task_com, total_task_done))
+    print("Employee {} is done with tasks({}/{}):"
+          .format(employee_name, completed_todos, total_user_todos))
 
-    [print("\t {}".format(task.get("title"))) for task in total_tasks]
+    for title in titles:
+        print("\t {}".format(title))
