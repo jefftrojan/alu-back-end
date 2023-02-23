@@ -1,22 +1,27 @@
 #!/usr/bin/python3
-""" get data from csv """
+"""Exports data in the JSON format"""
 
-import csv
-import json
-import requests
-import sys
 if __name__ == "__main__":
-    def getTodos(id):
-        link = "https://jsonplaceholder.typicode.com/users/{}/todos".format(id)
-        res = requests.get(link)
-        return json.loads(res.text)
-    link = "https://jsonplaceholder.typicode.com/users/"
-    res = requests.get(link)
-    users = json.loads(res.text)
-    data = {}
-    for i in users:
-        todos = getTodos(i["id"])
-        data[i["id"]] = [{"task": j["title"], "completed": j["completed"],
-                          "username": i["username"]} for j in todos]
-    with open("todo_all_employees.json", 'w', encoding='utf-8') as f:
-        f.write(json.dumps(data))
+
+    import json
+    import requests
+    import sys
+
+    users = requests.get("https://jsonplaceholder.typicode.com/users")
+    users = users.json()
+    todos = requests.get('https://jsonplaceholder.typicode.com/todos')
+    todos = todos.json()
+    todoAll = {}
+
+    for user in users:
+        taskList = []
+        for task in todos:
+            if task.get('userId') == user.get('id'):
+                taskDict = {"username": user.get('username'),
+                            "task": task.get('title'),
+                            "completed": task.get('completed')}
+                taskList.append(taskDict)
+        todoAll[user.get('id')] = taskList
+
+    with open('todo_all_employees.json', mode='w') as f:
+        json.dump(todoAll, f)
