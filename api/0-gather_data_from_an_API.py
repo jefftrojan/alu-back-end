@@ -1,34 +1,22 @@
 #!/usr/bin/python3
-""" returns TODO list """
+"""
+Uses https://jsonplaceholder.typicode.com along with an employee ID to
+return information about the employee's todo list progress
+"""
 
+import requests
+from sys import argv
 
-import urllib.request
-import json
-import sys
-
-""" Get the employee ID from the command-line argument """
-employee_id = sys.argv[1]
-
-""" Construct the API URL with the employee ID as a query parameter """
-url = f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}"
-
-""" Use urllib to make a GET request to the API endpoint and retrieve the TODO list """
-try:
-    with urllib.request.urlopen(url) as response:
-        data = json.loads(response.read().decode())
-except urllib.error.HTTPError:
-    """ Handle errors if the employee ID is not found or there is some other problem with the API """
-    print(f"Error retrieving TODO list for employee ID {employee_id}")
-    sys.exit(1)
-
-""" Filter the TODO list to get only the completed tasks and count them """
-completed_tasks = [todo for todo in data if todo["completed"]]
-total_tasks = len(data)
-
-""" Get the name of the employee from the first TODO item in the list """
-employee_name = data[0]["username"]
-
-""" Print the TODO list progress in the required format """
-print(f"Employee {employee_name} is done with tasks ({len(completed_tasks)}/{total_tasks}):")
-for todo in completed_tasks:
-    print(f"\t{todo['title']}")
+if __name__ == '__main__':
+    userId = argv[1]
+    user = requests.get("https://jsonplaceholder.typicode.com/users/{}".
+                        format(userId), verify=False).json()
+    todo = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".
+                        format(userId), verify=False).json()
+    completed_tasks = []
+    for task in todo:
+        if task.get('completed') is True:
+            completed_tasks.append(task.get('title'))
+    print("Employee {} is done with tasks({}/{}):".
+          format(user.get('name'), len(completed_tasks), len(todo)))
+    print("\n".join("\t {}".format(task) for task in completed_tasks))
